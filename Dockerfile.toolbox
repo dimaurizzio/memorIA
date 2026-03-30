@@ -1,0 +1,10 @@
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y curl ca-certificates && rm -rf /var/lib/apt/lists/*
+ARG TOOLBOX_VERSION=0.31.0
+RUN curl -fsSL https://storage.googleapis.com/genai-toolbox/v${TOOLBOX_VERSION}/linux/amd64/toolbox \
+    -o /usr/local/bin/toolbox && chmod +x /usr/local/bin/toolbox
+WORKDIR /app
+COPY dev_data/ ./dev_data/
+COPY dev_data/toolbox_dev.yaml ./toolbox.yaml
+EXPOSE 5000
+CMD ["toolbox", "--config", "toolbox.yaml", "--address", "0.0.0.0", "--port", "5000"]

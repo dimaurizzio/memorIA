@@ -1,0 +1,58 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: memoria
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d memoria"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  toolbox:
+    build:
+      context: .
+      dockerfile: Dockerfile.toolbox
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./dev_data:/app/dev_data   # SQLite persiste en el host
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "8000:8000"
+    env_file: .env
+    environment:
+      TOOLBOX_URL: http://toolbox:5000       # override: usar nombre de servicio en Docker
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/memoria
+    depends_on:
+      postgres:
+        condition: service_healthy
+      toolbox:
+        condition: service_started
+    volumes:
+      - ./dev_data:/app/dev_data
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    environment:
+      API_URL: http://api:8000               # usado por el proxy de Next.js
+    depends_on:
+      - api
+
+volumes:
+  pgdata:

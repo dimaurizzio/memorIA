@@ -1,0 +1,38 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# Dev data — bases de datos locales
+dev_data/*.db
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# GenAI Toolbox binary
+toolbox.exe
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# AI agent code tools
+CLAUDE.md

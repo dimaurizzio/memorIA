@@ -1,0 +1,43 @@
+# Auto detect text files and normalize line endings to LF
+* text=auto
+
+# Force LF for shell scripts and Docker files
+*.sh text eol=lf
+*.bash text eol=lf
+Dockerfile text eol=lf
+docker-compose.yml text eol=lf
+docker-compose.yaml text eol=lf
+
+# Force LF for Python files
+*.py text eol=lf
+*.pyi text eol=lf
+
+# Force LF for SQL files
+*.sql text eol=lf
+
+# Force LF for JavaScript/TypeScript
+*.js text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.jsx text eol=lf
+*.json text eol=lf
+
+# Force LF for YAML
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.mov binary
+*.mp4 binary
+*.mp3 binary
+*.gz binary
+*.zip binary
+*.7z binary
+*.ttf binary
+*.otf binary
+*.db binary

@@ -1,0 +1,81 @@
+sources:
+  sample_db:
+    kind: sqlite
+    database: ./dev_data/northwind.db
+
+tools:
+  list_tables:
+    kind: sqlite-sql
+    source: sample_db
+    description: Lista todas las tablas y vistas disponibles en la base de datos con su tipo, conexión y base de datos
+    statement: "SELECT name, type, 'sqlite' AS connection, 'sample_db' AS database_name FROM sqlite_master WHERE type IN ('table','view') ORDER BY type, name"
+
+  get_table_schema:
+    kind: sqlite-sql
+    source: sample_db
+    description: Obtiene el schema de una tabla específica (columnas, tipos, constraints)
+    templateParameters:
+      - name: table_name
+        type: string
+        description: Nombre de la tabla
+    statement: "PRAGMA table_info({{.table_name}})"
+
+  get_sample_data:
+    kind: sqlite-sql
+    source: sample_db
+    description: Obtiene una muestra de 20 filas de una tabla
+    templateParameters:
+      - name: table_name
+        type: string
+        description: Nombre de la tabla
+    statement: "SELECT * FROM {{.table_name}} LIMIT 20"
+
+  get_foreign_keys:
+    kind: sqlite-sql
+    source: sample_db
+    description: Obtiene las foreign keys de una tabla
+    templateParameters:
+      - name: table_name
+        type: string
+        description: Nombre de la tabla
+    statement: "PRAGMA foreign_key_list({{.table_name}})"
+
+  get_indexes:
+    kind: sqlite-sql
+    source: sample_db
+    description: Obtiene los índices de una tabla con sus columnas
+    templateParameters:
+      - name: table_name
+        type: string
+        description: Nombre de la tabla
+    statement: "SELECT il.name AS index_name, il.\"unique\" AS is_unique, group_concat(ii.name, ', ') AS columns FROM pragma_index_list('{{.table_name}}') il JOIN pragma_index_info(il.name) ii GROUP BY il.name, il.\"unique\""
+
+  get_row_count:
+    kind: sqlite-sql
+    source: sample_db
+    description: Obtiene el conteo aproximado de filas de una tabla
+    templateParameters:
+      - name: table_name
+        type: string
+        description: Nombre de la tabla
+    statement: "SELECT COUNT(*) AS row_count FROM {{.table_name}}"
+
+  get_ddl:
+    kind: sqlite-sql
+    source: sample_db
+    description: Obtiene la sentencia CREATE (DDL) de una tabla o vista
+    templateParameters:
+      - name: object_name
+        type: string
+        description: Nombre de la tabla o vista
+    statement: "SELECT sql FROM sqlite_master WHERE name = '{{.object_name}}'"
+
+toolsets:
+  default:
+    - list_tables
+    - get_table_schema
+    - get_sample_data
+    - get_foreign_keys
+    - get_indexes
+    - get_row_count
+    - get_ddl

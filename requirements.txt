@@ -1,0 +1,16 @@
+langgraph                # Orquestación de agentes con grafos de estado
+langchain-google-genai   # Integración de Gemini con LangChain/LangGraph
+psycopg2-binary          # Driver PostgreSQL (incluye binarios, sin dependencias de sistema)
+fastapi                  # Framework para la API REST
+uvicorn[standard]        # Servidor ASGI para correr FastAPI
+python-dotenv            # Carga variables de entorno desde el archivo .env
+httpx                    # Cliente HTTP async (para llamadas a GenAI Toolbox MCP)
+pydantic                 # Validación de datos y modelos (usado por FastAPI)
+google-generativeai      # SDK de Gemini para embeddings y generación de texto
+google-genai             # SDK actualizado de Google para Gemini
+langsmith                # Observabilidad y trazado de LangChain/LangGraph para ver las cadenas de razonamiento de los agentes
+toolbox-langchain        # SDK oficial para consumir GenAI Toolbox desde LangChain/LangGraph
+playwright               # Generación de PDFs pixel-perfect via Chromium headless
+                         # Después de instalar correr: playwright install chromium
+mcp                      # SDK oficial MCP de Python (transporte stdio para Tableau MCP server)
+

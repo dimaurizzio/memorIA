@@ -1,0 +1,8 @@
+FROM node:20-alpine
+WORKDIR /app
+COPY frontend/package*.json ./
+RUN npm ci
+COPY frontend/ .
+EXPOSE 3000
+# --hostname 0.0.0.0 necesario para ser accesible fuera del contenedor
+CMD ["npm", "run", "dev", "--", "--hostname", "0.0.0.0"]
