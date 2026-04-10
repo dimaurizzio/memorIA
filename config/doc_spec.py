@@ -15,19 +15,6 @@ from dataclasses import dataclass, field
 from typing import Sequence
 import json
 
-# ── Enums validos ────────────────────────────────────────────────────────────
-
-VALID_ENUMS: dict[str, list[str]] = {
-    "object_type":    ["table", "view", "stored_procedure", "dashboard"],
-    "sensitivity":    ["public", "internal", "confidential", "restricted"],
-    "object_status":  ["active", "deprecated", "migrating", "historical", "experimental"],
-    "load_mode":      ["incremental", "full_refresh", "append_only", "near_realtime", "streaming"],
-    "view_type":      ["simple", "join", "aggregated", "materialized", "rls"],
-    "dashboard_type": ["strategic", "tactical", "operational", "self-service"],
-    "table_subtype":  ["fact", "dimension", "staging", "lookup", "config", "log", "aggregated", "intermediate"],
-    "sp_subtype":     ["data_transformation", "etl_load", "business_calculation",
-                       "validation", "maintenance", "external_integration"],
-}
 
 
 # ── Dataclasses ──────────────────────────────────────────────────────────────
@@ -531,6 +518,23 @@ _SPECS: dict[str, tuple[SectionSpec, ...]] = {
                       quality_criteria="Observacion si supera 90 dias."),
         )),
     ),
+}
+
+
+# ── Enums validos ────────────────────────────────────────────────────────────
+# object_type se deriva de _SPECS para mantenerse siempre sincronizado.
+
+VALID_ENUMS: dict[str, list[str]] = {
+    "object_type":    list(_SPECS.keys()),
+    "sensitivity":    ["public", "internal", "confidential", "restricted"],
+    "object_status":  ["active", "deprecated", "migrating", "historical", "experimental"],
+    "load_mode":      ["incremental", "full_refresh", "append_only", "near_realtime", "streaming"],
+    "view_type":      ["simple", "join", "aggregated", "materialized", "rls"],
+    "dashboard_type": ["strategic", "tactical", "operational", "self-service"],
+    "table_subtype":  ["fact", "dimension", "staging", "lookup", "config", "log", "aggregated", "intermediate"],
+    "document_status": ["draft", "approved", "deslisted"],
+    "sp_subtype":     ["data_transformation", "etl_load", "business_calculation",
+                       "validation", "maintenance", "external_integration"],
 }
 
 

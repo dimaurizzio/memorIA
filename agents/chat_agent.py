@@ -6,6 +6,7 @@ La memoria conversacional se maneja pasando el historial completo en cada llamad
 — sin checkpointer, lo que mantiene el agente stateless y compatible con Streamlit.
 """
 import requests
+from enum import Enum
 from dotenv import load_dotenv
 from langchain_core.tools import tool
 from langchain_core.messages import HumanMessage, AIMessage
@@ -14,6 +15,10 @@ from langgraph.prebuilt import create_react_agent
 
 from agents.prompts import CHAT_AGENT_SYSTEM_PROMPT
 from config.object_types import OBJECT_TYPES
+from config.doc_spec import supported_types, get_enum_values
+
+DocumentStatus = Enum("DocumentStatus", {v: v for v in ["todos"] + get_enum_values("document_status")})  # type: ignore
+ObjectType     = Enum("ObjectType",     {v: v for v in ["todos"] + supported_types()})  # type: ignore
 
 load_dotenv()
 
@@ -124,7 +129,8 @@ def crear_documentacion(object_type: str, object_name: str) -> str:
 def buscar_documentacion(pregunta: str) -> str:
     """
     Responde preguntas en lenguaje natural usando la documentación aprobada.
-    Usá esta tool para preguntas sobre campos, tablas, ETLs, lógica de negocio, etc.
+    Usá esta tool para cualquier pregunta sobre documentación: campos, tablas, ETLs,
+    lógica de negocio, gobernanza (dueños, responsables, dominios), casos de uso, etc.
 
     Args:
         pregunta: la pregunta completa en lenguaje natural
@@ -155,20 +161,16 @@ def buscar_documentacion(pregunta: str) -> str:
 
 
 @tool
-def listar_documentacion(status: str = "todos", object_type: str = "todos") -> str:
+def listar_documentacion(status: DocumentStatus = DocumentStatus.todos, object_type: ObjectType = ObjectType.todos) -> str:
     """
     Lista los documentos de documentación existentes con filtros opcionales.
     Los borradores solo se muestran al admin o al creador.
-
-    Args:
-        status: estado del documento — todos, draft, approved, rejected
-        object_type: tipo de objeto — todos, table, view, dashboard, etl, stored_procedure
     """
     params = {"user_id": _current_user, "role": "admin" if _current_user == "admin" else "developer"}
-    if status != "todos":
-        params["status"] = status
-    if object_type != "todos":
-        params["object_type"] = object_type
+    if status.value != "todos":
+        params["status"] = status.value
+    if object_type.value != "todos":
+        params["object_type"] = object_type.value
 
     r = requests.get(f"{API}/documents", params=params, timeout=10)
     if not r.ok:

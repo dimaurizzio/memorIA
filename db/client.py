@@ -196,15 +196,18 @@ def log_conversation(user_id: str, agent_type: str, prompt: str, response: str,
 
 # --- Embeddings ---
 
-def save_embedding(document_id: str, embedding: list[float], content_text: str) -> None:
-    """Inserta el embedding de un documento aprobado."""
+def save_embedding(document_id: str, section_key: str, embedding: list[float], content_text: str) -> None:
+    """Inserta o actualiza el embedding de un chunk (sección) de documento aprobado."""
     vec = "[" + ",".join(map(str, embedding)) + "]"
     with _conn() as conn:
         with conn.cursor() as cur:
             cur.execute("""
-                INSERT INTO document_embeddings (document_id, embedding, content_text)
-                VALUES (%s, %s::vector, %s)
-            """, (document_id, vec, content_text))
+                INSERT INTO document_embeddings (document_id, section_key, embedding, content_text)
+                VALUES (%s, %s, %s::vector, %s)
+                ON CONFLICT (document_id, section_key) DO UPDATE
+                  SET embedding = EXCLUDED.embedding,
+                      content_text = EXCLUDED.content_text
+            """, (document_id, section_key, vec, content_text))
 
 
 def delete_embedding(document_id: str) -> None:

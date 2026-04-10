@@ -6,7 +6,7 @@ import json
 import re
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
-from agents.prompts import INTENT_SYSTEM_PROMPT
+from agents.prompts import INTENT_SYSTEM_PROMPT, extract_text
 from config.object_types import type_names
 
 load_dotenv()
@@ -45,7 +45,7 @@ def detect_intent(message: str, history: list[dict] | None = None) -> dict:
         history_context=history_context,
     )
     response = llm.invoke(prompt)
-    text = response.content.strip()
+    text = extract_text(response)
 
     # Limpiar bloque de código markdown si está presente
     text = re.sub(r"```json\s*", "", text)

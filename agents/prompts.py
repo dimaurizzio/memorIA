@@ -4,12 +4,26 @@ Ningún agente debe tener strings de prompt hardcodeados fuera de este archivo.
 
 Los prompts del generador y auditor se construyen dinámicamente desde config.doc_spec.
 """
+from langchain_core.messages import BaseMessage
 from config.doc_spec import (
     get_json_schema_str,
     build_generator_instructions,
     build_auditor_criteria,
     supported_types,
 )
+
+
+def extract_text(response: BaseMessage) -> str:
+    """
+    Extrae el texto de una respuesta del LLM de forma segura.
+    Gemini 2.5+ puede devolver content como lista de bloques en vez de string.
+    """
+    content = response.content
+    if isinstance(content, list):
+        return "".join(
+            block.get("text", "") for block in content if isinstance(block, dict)
+        ).strip()
+    return content.strip()
 
 # --- Agente Generador ---
 
@@ -25,6 +39,8 @@ Reglas estrictas:
 2. No inventes información. Si no está en el metadata, no lo incluyas.
 3. En las descripciones de los campos, añade siempre ejemplos de valores posibles basados en la muestra de datos.
 4. Respeta estrictamente las instrucciones por tipo de campo (AUTO, PARCIAL, HUMANO) que se detallan abajo.
+5. Para campos PARCIAL: antes de escribir el valor, verificá mentalmente que cumple el quality_criteria y no contiene ninguna frase del must_not_contain.
+Si tu borrador las contiene, reescribilo hasta que las cumpla.
 
 Schema del documento:
 {schema}

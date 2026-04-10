@@ -5,15 +5,17 @@
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white)
 ![LangGraph](https://img.shields.io/badge/LangGraph-agentes-1C3D5A?style=flat-square)
-![Gemini](https://img.shields.io/badge/Gemini_2.5_Flash-Google_AI-4285F4?style=flat-square&logo=google&logoColor=white)
+![Gemini](https://img.shields.io/badge/Gemini-Google_AI-4285F4?style=flat-square&logo=google&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-pgvector-4169E1?style=flat-square&logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-compose-2496ED?style=flat-square&logo=docker&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 
+![Demo](docs/memorIA-low-quality.gif)
+
 Genera, audita y permite consultar documentación de tablas, vistas, stored procedures y dashboards de Tableau — todo desde una interfaz de chat conversacional.
 MemorIA es una solución barata para un problema común de la industria. No basta con establecer el mejor estándar de calidad de documentación si no es realmente alcanzable, o genera mucha fricción entre su creación y disponibilización. No hace todo pero, allana el camino.
 
-Desarrollado y testeado sobre la API de **Google Gemini**. Gemini 2.5 Flash resultó más que suficiente para todas las tareas del sistema: generación de borradores, evaluación de calidad, embeddings y respuestas RAG.
+Desarrollado y testeado sobre la API de **Google Gemini**. Los modelos de la familia Gemini resultan más que suficientes para todas las tareas del sistema: generación de borradores, evaluación de calidad, embeddings y respuestas RAG.
 
 ---
 

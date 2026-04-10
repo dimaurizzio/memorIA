@@ -24,7 +24,7 @@ from db.client import (
     delete_embedding,
     list_embedding_document_ids,
 )
-from tools.embedding import generate_embedding, document_to_text
+from tools.embedding import generate_embedding, document_to_section_chunks
 
 load_dotenv()
 
@@ -36,7 +36,7 @@ app = FastAPI(title="Indexer Worker")
 # --- Lógica de indexación ---
 
 async def index_document(document_id: str) -> None:
-    """Genera el embedding de un documento aprobado y lo guarda en Supabase."""
+    """Genera un embedding por sección del spec y los guarda en document_embeddings."""
     document = get_document(document_id)
     if not document:
         print(f"[indexer] Documento {document_id} no encontrado.")
@@ -46,19 +46,19 @@ async def index_document(document_id: str) -> None:
         print(f"[indexer] Documento {document_id} no está aprobado, saltando.")
         return
 
-    # Serializar el documento completo a texto plano para el embedding
-    content_text = document_to_text(document)
+    chunks = document_to_section_chunks(document)
+    if not chunks:
+        print(f"[indexer] Documento {document_id} no generó chunks, saltando.")
+        return
 
-    # Generar embedding con Gemini
-    embedding = generate_embedding(content_text)
-
-    # Eliminar embedding anterior si existe (por si es una re-indexación)
+    # Eliminar chunks anteriores (re-indexación limpia)
     delete_embedding(document_id)
 
-    # Guardar nuevo embedding
-    save_embedding(document_id, embedding, content_text)
+    for section_key, chunk_text in chunks.items():
+        embedding = generate_embedding(chunk_text)
+        save_embedding(document_id, section_key, embedding, chunk_text)
 
-    print(f"[indexer] Documento {document_id} indexado correctamente.")
+    print(f"[indexer] '{document['name']}' indexado — {len(chunks)} secciones.")
 
 
 async def remove_from_index(document_id: str) -> None:

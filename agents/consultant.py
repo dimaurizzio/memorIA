@@ -15,7 +15,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import StateGraph, END
 
-from agents.prompts import CONSULTANT_SYSTEM_PROMPT
+from agents.prompts import CONSULTANT_SYSTEM_PROMPT, extract_text
 from tools.embedding import generate_query_embedding, document_to_full_context
 from db.client import search_documents, log_conversation, get_document
 
@@ -96,7 +96,7 @@ async def generate_answer_node(state: ConsultantState) -> ConsultantState:
 
     messages = [HumanMessage(content=prompt)]
     response = await llm.ainvoke(messages)
-    raw = response.content.strip()
+    raw = extract_text(response)
 
     # Parsear JSON estructurado con reintento (igual que generator y auditor)
     parsed = None
@@ -118,7 +118,7 @@ async def generate_answer_node(state: ConsultantState) -> ConsultantState:
                     HumanMessage(content="Respondé ÚNICAMENTE con el JSON, sin texto adicional ni bloques de código."),
                 ]
                 retry_response = await llm.ainvoke(retry_msg)
-                raw = retry_response.content.strip()
+                raw = extract_text(retry_response)
                 current_messages = retry_msg + [retry_response]
 
     if parsed is None:

@@ -14,7 +14,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import StateGraph, END
 
-from agents.prompts import build_auditor_prompt
+from agents.prompts import build_auditor_prompt, extract_text
 from db.client import (
     get_document,
     update_document,
@@ -93,7 +93,7 @@ async def evaluate_node(state: AuditorState) -> AuditorState:
                     HumanMessage(content="Respondé ÚNICAMENTE con el JSON, sin texto adicional ni bloques de código."),
                 ]
                 response = await llm.ainvoke(retry_msg)
-                cleaned = response.content.strip()
+                cleaned = extract_text(response)
 
     if evaluation is None:
         return {**state, "error": f"No se pudo parsear la evaluación de Gemini: {last_error}"}

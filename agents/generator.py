@@ -15,7 +15,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import StateGraph, END
 
-from agents.prompts import build_generator_prompt
+from agents.prompts import build_generator_prompt, extract_text
 from tools.mcp_client import (
     get_table_schema, get_sample_data,
     get_foreign_keys, get_indexes, get_row_count, get_ddl,
@@ -119,7 +119,7 @@ async def generate_draft_node(state: GeneratorState) -> GeneratorState:
                     HumanMessage(content="La respuesta anterior no era JSON válido. Respondé ÚNICAMENTE con el JSON, sin texto adicional ni bloques de código."),
                 ]
                 response = await llm.ainvoke(retry_msg)
-                cleaned = response.content.strip()
+                cleaned = extract_text(response)
 
     if draft_content is None:
         return {**state, "error": f"No se pudo parsear el JSON de Gemini: {last_error}"}

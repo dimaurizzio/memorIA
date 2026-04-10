@@ -20,12 +20,15 @@ CREATE TABLE documents (
 );
 
 -- Embeddings de documentos aprobados para búsqueda semántica (RAG)
+-- Un documento genera un embedding por sección del spec (chunking por sección).
 CREATE TABLE document_embeddings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   document_id UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
-  embedding vector(768),          -- dimensión de text-embedding-004
-  content_text TEXT NOT NULL,     -- texto plano del doc para contexto
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  section_key TEXT NOT NULL,      -- clave de la sección del spec (ej: 'governance', 'description')
+  embedding vector(768),          -- dimensión de gemini-embedding-001
+  content_text TEXT NOT NULL,     -- texto del chunk para contexto
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE (document_id, section_key)
 );
 
 -- Índice de búsqueda semántica sobre los embeddings
@@ -74,7 +77,9 @@ CREATE TABLE users (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Función para búsqueda semántica en documentos aprobados
+-- Función para búsqueda semántica en documentos aprobados.
+-- Busca a nivel de chunk (sección) y devuelve el mejor chunk por documento,
+-- evitando que un mismo documento aparezca varias veces en los resultados.
 CREATE OR REPLACE FUNCTION search_documents(
   query_embedding vector(768),
   match_count INT DEFAULT 5,
@@ -82,20 +87,33 @@ CREATE OR REPLACE FUNCTION search_documents(
 )
 RETURNS TABLE (
   document_id UUID,
+  section_key TEXT,
+  document_name TEXT,
   content_text TEXT,
   similarity FLOAT
 )
 LANGUAGE SQL STABLE
 AS $$
-  SELECT
-    de.document_id,
-    de.content_text,
-    1 - (de.embedding <=> query_embedding) AS similarity
-  FROM document_embeddings de
-  JOIN documents d ON d.id = de.document_id
-  WHERE d.status = 'approved'
-    AND 1 - (de.embedding <=> query_embedding) > similarity_threshold
-  ORDER BY de.embedding <=> query_embedding
+  WITH ranked AS (
+    SELECT
+      de.document_id,
+      de.section_key,
+      d.name AS document_name,
+      de.content_text,
+      1 - (de.embedding <=> query_embedding) AS similarity,
+      ROW_NUMBER() OVER (
+        PARTITION BY de.document_id
+        ORDER BY de.embedding <=> query_embedding
+      ) AS rn
+    FROM document_embeddings de
+    JOIN documents d ON d.id = de.document_id
+    WHERE d.status = 'approved'
+      AND 1 - (de.embedding <=> query_embedding) > similarity_threshold
+  )
+  SELECT document_id, section_key, document_name, content_text, similarity
+  FROM ranked
+  WHERE rn = 1
+  ORDER BY similarity DESC
   LIMIT match_count;
 $$;
 
